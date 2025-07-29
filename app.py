@@ -197,8 +197,8 @@ def visualize_page(df):
 
 # === MAIN APP ===
 def main():
-    st.set_page_config(page_title="NFSU Goa Houses", layout="wide")
-    st.title("🎓 NFSU Goa Houses")
+    st.set_page_config(page_title="NFSU Goa Data", layout="wide")
+    st.title("🎓 NFSU Goa Data")
 
     if not os.path.exists(DATA_FOLDER):
         st.error(f"`{DATA_FOLDER}` folder not found. Please create it and add your Excel files.")
