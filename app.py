@@ -104,7 +104,7 @@ def house_distribution_page(df):
 
     st.subheader("🏠 House Distribution")
     global_house_counts = {"M": defaultdict(int), "F": defaultdict(int)}
-    assigned_df = load_or_assign_houses(df, global_house_counts)
+    assigned_df = load_or_assign_houses(df)
 
     st.download_button(
         label="📥 Download House Distribution Excel",
