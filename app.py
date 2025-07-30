@@ -88,19 +88,24 @@ def view_data_page(df):
     selected_gender = st.sidebar.multiselect("⚧️ Filter by Gender", ["M", "F"], default=["M", "F"])
 
     all_columns = df.columns.tolist()
-    default_cols = ["Enrollment No", "Student Name"]
-    selected_cols = st.sidebar.multiselect("📋 Select Columns to Display", all_columns, default=default_cols)
+    default_cols = ["Enrollment No", "Student Name","Email-ID"]
+    
+    if verify_password():
+        
+        selected_cols = st.sidebar.multiselect("📋 Select Columns to Display", all_columns, default=default_cols)
 
-    filtered = df.copy()
-    if selected_streams:
-        filtered = filtered[filtered["Stream"].isin(selected_streams)]
-    if selected_sems:
-        filtered = filtered[filtered["Semester"].isin(selected_sems)]
-    if selected_gender:
-        filtered = filtered[filtered["Gender"].isin(selected_gender)]
+        filtered = df.copy()
+        if selected_streams:
+            filtered = filtered[filtered["Stream"].isin(selected_streams)]
+        if selected_sems:
+            filtered = filtered[filtered["Semester"].isin(selected_sems)]
+        if selected_gender:
+            filtered = filtered[filtered["Gender"].isin(selected_gender)]
 
-    st.dataframe(filtered[selected_cols], use_container_width=True)
-
+        st.dataframe(filtered[selected_cols], use_container_width=True)
+    else
+        st.warning("Access denied. Please enter the admin password in the sidebar to continue.")
+        return
 
 # === HOUSE DISTRIBUTION PAGE ===
 def house_distribution_page(df):
@@ -223,6 +228,14 @@ def main():
         assigned_df = assign_houses(df, global_house_counts)
         visualize_page(assigned_df)
 
+def verify_password():
+    correct_password = "nfsu@123"
+    password = st.sidebar.text_input("🔒 Enter Admin Password", type="password")
+    if password == correct_password:
+        return True
+    elif password != "":
+        st.sidebar.error("Incorrect password.")
+    return False
 
 if __name__ == "__main__":
     main()
