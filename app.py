@@ -7,7 +7,6 @@ from io import BytesIO
 import plotly.express as px
 
 ASSIGNED_DATA_FILE = "assigned_houses.xlsx"
-# === CONFIG ===
 DATA_FOLDER = "Data"
 HOUSE_COLORS = {
     "House A": "#FF9999",
@@ -15,7 +14,6 @@ HOUSE_COLORS = {
     "House C": "#99FF99",
     "House D": "#FFCC99",
 }
-
 
 # === DATA LOADING ===
 def load_all_students_from_data_folder():
@@ -37,17 +35,31 @@ def load_all_students_from_data_folder():
             all_data = pd.concat([all_data, df], ignore_index=True)
     return all_data
 
+# === ASSIGN HOUSES FUNCTION ===
+def assign_houses(df, global_house_counts):
+    assigned_df = df.copy()
+    assigned_df["House"] = None
+    for (stream, sem, gender), group_df in df.groupby(["Stream", "Semester", "Gender"]):
+        students = group_df.index.tolist()
+        random.shuffle(students)
+        house_order = sorted(HOUSE_COLORS.keys(), key=lambda h: global_house_counts[gender][h])
+        house_cycle = house_order * ((len(students) // len(house_order)) + 1)
+        for i, idx in enumerate(students):
+            house = house_cycle[i % len(house_order)]
+            assigned_df.at[idx, "House"] = house
+            global_house_counts[gender][house] += 1
+    return assigned_df
 
+# === LOAD OR ASSIGN HOUSES ===
 def load_or_assign_houses(df):
     if os.path.exists(ASSIGNED_DATA_FILE):
         assigned_df = pd.read_excel(ASSIGNED_DATA_FILE)
         return assigned_df
     else:
         global_house_counts = {"M": defaultdict(int), "F": defaultdict(int)}
-        assigned_df = load_or_assign_houses(df)
+        assigned_df = assign_houses(df, global_house_counts)
         assigned_df.to_excel(ASSIGNED_DATA_FILE, index=False)
         return assigned_df
-
 
 # === HOUSE EXCEL DOWNLOAD ===
 def get_excel_download(df):
@@ -65,12 +77,10 @@ def get_excel_download(df):
     output.seek(0)
     return output
 
-
 # === STYLING ===
 def highlight_house(house):
     color = HOUSE_COLORS.get(house, "#FFFFFF")
     return f"background-color: {color};"
-
 
 # === VIEW DATA PAGE ===
 def view_data_page(df):
@@ -84,8 +94,7 @@ def view_data_page(df):
     selected_gender = st.sidebar.multiselect("⚧️ Filter by Gender", ["M", "F"], default=["M", "F"])
 
     all_columns = df.columns.tolist()
-    default_cols = ["Enrollment No", "Student Name","Email-ID"]
-    
+    default_cols = ["Enrollment No", "Student Name", "Email-ID"]
 
     selected_cols = st.sidebar.multiselect("📋 Select Columns to Display", all_columns, default=default_cols)
 
@@ -99,10 +108,8 @@ def view_data_page(df):
 
     st.dataframe(filtered[selected_cols], use_container_width=True)
 
-
 # === HOUSE DISTRIBUTION PAGE ===
 def house_distribution_page(df):
-
     st.subheader("🏠 House Distribution")
     global_house_counts = {"M": defaultdict(int), "F": defaultdict(int)}
     assigned_df = load_or_assign_houses(df)
@@ -137,7 +144,6 @@ def house_distribution_page(df):
             st.markdown(f"#### Gender: `{gender}`")
             counts = gender_df["House"].value_counts().reindex(HOUSE_COLORS.keys(), fill_value=0)
             st.write(pd.DataFrame({"House": counts.index, "Count": counts.values}))
-
 
 # === VISUALIZATION PAGE ===
 def visualize_page(df):
@@ -210,8 +216,7 @@ def main():
         st.error(f"Missing required columns. Required: {required_cols}")
         return
 
-    # === SIDEBAR MENU ===
-    menu = st.sidebar.radio("📋 Menu", ["House Distribution", "Visualize","View Data"])
+    menu = st.sidebar.radio("📋 Menu", ["House Distribution", "Visualize", "View Data"])
 
     if menu == "House Distribution":
         house_distribution_page(df)
@@ -224,7 +229,6 @@ def main():
             st.warning("Access denied. Please enter the admin password in the sidebar to continue.")
             return
         view_data_page(df)
-    
 
 def verify_password():
     correct_password = "nfsu@123"
