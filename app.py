@@ -90,22 +90,19 @@ def view_data_page(df):
     all_columns = df.columns.tolist()
     default_cols = ["Enrollment No", "Student Name","Email-ID"]
     
-    if verify_password():
-        
-        selected_cols = st.sidebar.multiselect("📋 Select Columns to Display", all_columns, default=default_cols)
 
-        filtered = df.copy()
-        if selected_streams:
-            filtered = filtered[filtered["Stream"].isin(selected_streams)]
-        if selected_sems:
-            filtered = filtered[filtered["Semester"].isin(selected_sems)]
-        if selected_gender:
-            filtered = filtered[filtered["Gender"].isin(selected_gender)]
+    selected_cols = st.sidebar.multiselect("📋 Select Columns to Display", all_columns, default=default_cols)
 
-        st.dataframe(filtered[selected_cols], use_container_width=True)
-    else:
-        st.warning("Access denied. Please enter the admin password in the sidebar to continue.")
-        return
+    filtered = df.copy()
+    if selected_streams:
+        filtered = filtered[filtered["Stream"].isin(selected_streams)]
+    if selected_sems:
+        filtered = filtered[filtered["Semester"].isin(selected_sems)]
+    if selected_gender:
+        filtered = filtered[filtered["Gender"].isin(selected_gender)]
+
+    st.dataframe(filtered[selected_cols], use_container_width=True)
+
 
 # === HOUSE DISTRIBUTION PAGE ===
 def house_distribution_page(df):
@@ -220,6 +217,9 @@ def main():
     menu = st.sidebar.radio("📋 Menu", ["View Data", "House Distribution", "Visualize"])
 
     if menu == "View Data":
+        if not verify_password():
+            st.warning("Access denied. Please enter the admin password in the sidebar to continue.")
+            return
         view_data_page(df)
     elif menu == "House Distribution":
         house_distribution_page(df)
