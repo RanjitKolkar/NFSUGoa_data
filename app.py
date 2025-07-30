@@ -214,7 +214,7 @@ def main():
         return
 
     # === SIDEBAR MENU ===
-    menu = st.sidebar.radio("📋 Menu", ["View Data", "House Distribution", "Visualize"])
+    menu = st.sidebar.radio("📋 Menu", ["House Distribution", "Visualize","View Data"])
 
     if menu == "House Distribution":
         house_distribution_page(df)
