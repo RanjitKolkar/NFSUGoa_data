@@ -94,7 +94,7 @@ def view_data_page(df):
     selected_gender = st.sidebar.multiselect("⚧️ Filter by Gender", ["M", "F"], default=["M", "F"])
 
     all_columns = df.columns.tolist()
-    default_cols = ["Enrollment No", "Student Name", "Email-ID"]
+    default_cols = ["Enrollment No", "Student Name","Email-ID"]
 
     selected_cols = st.sidebar.multiselect("📋 Select Columns to Display", all_columns, default=default_cols)
 
@@ -105,6 +105,30 @@ def view_data_page(df):
         filtered = filtered[filtered["Semester"].isin(selected_sems)]
     if selected_gender:
         filtered = filtered[filtered["Gender"].isin(selected_gender)]
+
+    # Show editable table only if House column exists
+    if "House" in filtered.columns:
+        st.markdown("### ✏️ Edit House Assignments")
+        editable_df = filtered[selected_cols + ["House"] if "House" not in selected_cols else selected_cols]
+        
+        # Allow editing only the House column
+        edited_df = st.data_editor(
+            editable_df,
+            num_rows="dynamic",
+            use_container_width=True,
+            column_config={
+                "House": st.column_config.SelectboxColumn(
+                    "House",
+                    options=list(HOUSE_COLORS.keys()),
+                )
+            },
+            disabled= [col for col in editable_df.columns if col != "House"],
+        )
+
+        if st.button("💾 Save House Changes"):
+            # Save updated house assignments
+            edited_df.to_excel(ASSIGNED_DATA_FILE, index=False)
+            st.success("House assignments updated and saved!")
 
     st.dataframe(filtered[selected_cols], use_container_width=True)
 
