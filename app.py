@@ -216,17 +216,18 @@ def main():
     # === SIDEBAR MENU ===
     menu = st.sidebar.radio("📋 Menu", ["View Data", "House Distribution", "Visualize"])
 
-    if menu == "View Data":
-        if not verify_password():
-            st.warning("Access denied. Please enter the admin password in the sidebar to continue.")
-            return
-        view_data_page(df)
-    elif menu == "House Distribution":
+    if menu == "House Distribution":
         house_distribution_page(df)
     elif menu == "Visualize":
         global_house_counts = {"M": defaultdict(int), "F": defaultdict(int)}
         assigned_df = assign_houses(df, global_house_counts)
         visualize_page(assigned_df)
+    elif menu == "View Data":
+        if not verify_password():
+            st.warning("Access denied. Please enter the admin password in the sidebar to continue.")
+            return
+        view_data_page(df)
+    
 
 def verify_password():
     correct_password = "nfsu@123"
