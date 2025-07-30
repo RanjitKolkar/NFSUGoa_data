@@ -6,6 +6,7 @@ from collections import defaultdict
 from io import BytesIO
 import plotly.express as px
 
+ASSIGNED_DATA_FILE = "assigned_houses.xlsx"
 # === CONFIG ===
 DATA_FOLDER = "Data"
 HOUSE_COLORS = {
@@ -37,21 +38,15 @@ def load_all_students_from_data_folder():
     return all_data
 
 
-# === HOUSE ASSIGNMENT ===
-def assign_houses(df, global_house_counts):
-    assigned_df = df.copy()
-    assigned_df["House"] = None
-    for (stream, sem, gender), group_df in df.groupby(["Stream", "Semester", "Gender"]):
-        students = group_df.index.tolist()
-        random.shuffle(students)
-        house_order = sorted(HOUSE_COLORS.keys(), key=lambda h: global_house_counts[gender][h])
-        house_cycle = house_order * ((len(students) // 4) + 1)
-        for i, idx in enumerate(students):
-            house = house_cycle[i % 4]
-            assigned_df.at[idx, "House"] = house
-            global_house_counts[gender][house] += 1
-    return assigned_df
-
+def load_or_assign_houses(df):
+    if os.path.exists(ASSIGNED_DATA_FILE):
+        assigned_df = pd.read_excel(ASSIGNED_DATA_FILE)
+        return assigned_df
+    else:
+        global_house_counts = {"M": defaultdict(int), "F": defaultdict(int)}
+        assigned_df = assign_houses(df, global_house_counts)
+        assigned_df.to_excel(ASSIGNED_DATA_FILE, index=False)
+        return assigned_df
 
 # === HOUSE EXCEL DOWNLOAD ===
 def get_excel_download(df):
@@ -106,9 +101,10 @@ def view_data_page(df):
 
 # === HOUSE DISTRIBUTION PAGE ===
 def house_distribution_page(df):
+
     st.subheader("🏠 House Distribution")
     global_house_counts = {"M": defaultdict(int), "F": defaultdict(int)}
-    assigned_df = assign_houses(df, global_house_counts)
+    assigned_df = load_or_assign_houses(df, global_house_counts)
 
     st.download_button(
         label="📥 Download House Distribution Excel",
