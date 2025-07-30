@@ -103,7 +103,7 @@ def view_data_page(df):
             filtered = filtered[filtered["Gender"].isin(selected_gender)]
 
         st.dataframe(filtered[selected_cols], use_container_width=True)
-    else
+    else:
         st.warning("Access denied. Please enter the admin password in the sidebar to continue.")
         return
 
