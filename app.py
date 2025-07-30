@@ -217,7 +217,7 @@ def main():
         house_distribution_page(df)
     elif menu == "Visualize":
         global_house_counts = {"M": defaultdict(int), "F": defaultdict(int)}
-        assigned_df = assign_houses(df, global_house_counts)
+        assigned_df = load_or_assign_houses(df)
         visualize_page(assigned_df)
     elif menu == "View Data":
         if not verify_password():
