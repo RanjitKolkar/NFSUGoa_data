@@ -44,7 +44,7 @@ def load_or_assign_houses(df):
         return assigned_df
     else:
         global_house_counts = {"M": defaultdict(int), "F": defaultdict(int)}
-        assigned_df = assign_houses(df, global_house_counts)
+        assigned_df = assign_houses(df)
         assigned_df.to_excel(ASSIGNED_DATA_FILE, index=False)
         return assigned_df
 
